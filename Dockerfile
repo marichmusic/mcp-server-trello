@@ -34,9 +34,16 @@ COPY --from=builder /app/bun.lock ./
 # Install only production dependencies without running scripts
 RUN bun install --production --frozen
 
+# Install supergateway -- wraps stdio MCP server as HTTP/SSE for Railway
+RUN bun add -g supergateway
+
 # The environment variables should be passed at runtime, not baked into the image
-# They can be provided via docker run -e or docker compose environment section
 ENV NODE_ENV=production
 
-# Run the MCP server using Bun
-CMD ["bun", "build/index.js"]
+# Expose port for Railway HTTP routing
+EXPOSE 8000
+
+# Run supergateway wrapping the Trello MCP stdio server
+# supergateway listens on HTTP/SSE, spawns the stdio server per connection
+# TRELLO_API_KEY and TRELLO_TOKEN come from Railway env vars
+CMD ["sh", "-c", "supergateway --stdio 'bun /app/build/index.js' --outputTransport sse --port ${PORT:-8000}"]
