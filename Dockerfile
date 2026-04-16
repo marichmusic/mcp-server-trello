@@ -44,6 +44,5 @@ ENV NODE_ENV=production
 EXPOSE 8000
 
 # Run supergateway wrapping the Trello MCP stdio server
-# supergateway listens on HTTP/SSE, spawns the stdio server per connection
 # TRELLO_API_KEY and TRELLO_TOKEN come from Railway env vars
-CMD ["sh", "-c", "supergateway --stdio 'bun /app/build/index.js' --outputTransport sse --port ${PORT:-8000}"]
+CMD ["sh", "-c", "supergateway --stdio 'bun /app/build/index.js' --outputTransport streamableHttp --port ${PORT:-8000}"]
